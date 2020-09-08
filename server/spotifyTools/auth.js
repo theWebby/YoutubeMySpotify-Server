@@ -6,22 +6,31 @@ const winston = require('winston');
 const URI = 'https://youtubemyspotify.uk/';
 const CLIENT_URL = 'https://thewebby.github.io/YoutubeMySpotify/#/AccountManager/'
 
-console.log('starting winston')
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.json(),
-  defaultMeta: { service: 'user-service' },
-  transports: [
-    //
-    // - Write all logs with level `error` and below to `error.log`
-    // - Write all logs with level `info` and below to `combined.log`
-    //
-    new winston.transports.File({ filename: './logs/error.log', level: 'error' }),
-    new winston.transports.File({ filename: './logs/combined.log' }),
-  ],
-});
 
-logger.info('started')
+const currentDateTime = () => {
+  const dateTime = new Date();
+  return `${dateTime.getDate()}/${dateTime.getMonth() + 1}/${dateTime.getFullYear()} - ${dateTime.getHours()}:${dateTime.getMinutes()}:${dateTime.getSeconds()}.${dateTime.getMilliseconds()}`}
+  
+  console.log('starting winston')
+  const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.json(),
+    transports: [
+      //
+      // - Write all logs with level `error` and below to `error.log`
+      // - Write all logs with level `info` and below to `combined.log`
+      //
+      new winston.transports.File({ filename: './logs/error.log', level: 'error' }),
+      new winston.transports.File({ filename: './logs/combined.log' }),
+    ],
+  });
+  
+const log = (message, data) => logger.info(message, {
+  time: currentDateTime(),
+  ...data
+})
+
+log('started')
 
 var authRouter = Router()
 var Oauth = {
@@ -44,6 +53,8 @@ var generateRandomString = function (length) {
 };
 
 authRouter.get('/login', function (req, res) {
+  log('/login');
+  
   var clientUrl = req.query.clientUrl  || null;
   var state = generateRandomString(16);
   res.cookie(stateKey, state);
@@ -108,6 +119,8 @@ authRouter.get('/callback', function (req, res) {
 });
 
 authRouter.get('/refresh_token', function (req, res) {
+  log('/refresh_token');
+
   // requesting access token from refresh token
   var refresh_token = req.query.refresh_token;
   var authOptions = {
@@ -137,8 +150,7 @@ authRouter.post('/getVideoId', function(req, res){
   songName = req.body.songName;
   artistName = req.body.artistName;
 
-  logger.info('/getVideoId', {
-    time: Date.now(),
+  log('/getVideoId', {
     songName,
     artistName
   });
@@ -181,7 +193,7 @@ function getTopResult(q, callback){
 }
 
 authRouter.get('/_status', function(req, res) {
-  logger.info('/_status')
+  log('/_status')
   res.send('hello');
 });
 
