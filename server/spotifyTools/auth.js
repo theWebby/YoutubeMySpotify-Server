@@ -181,6 +181,7 @@ function getTopResult(q, callback){
 }
 
 authRouter.get('/_status', function(req, res) {
+  logger.info('/_status')
   res.send('hello');
 });
 
