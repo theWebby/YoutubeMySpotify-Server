@@ -6,6 +6,7 @@ const winston = require('winston');
 const URI = 'https://youtubemyspotify.uk/';
 const CLIENT_URL = 'https://thewebby.github.io/YoutubeMySpotify/#/AccountManager/'
 
+console.log('starting winston')
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
@@ -19,6 +20,8 @@ const logger = winston.createLogger({
     new winston.transports.File({ filename: 'combined.log' }),
   ],
 });
+
+logger.info('started')
 
 var authRouter = Router()
 var Oauth = {

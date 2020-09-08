@@ -20,16 +20,21 @@ httpsApp.use(bodyParser.json());
 httpsApp.use(cors())
 httpsApp.use(spotifyTools)
 
-https.createServer({
-  key: fs.readFileSync('/etc/letsencrypt/live/youtubemyspotify.uk/privkey.pem'),
-  cert: fs.readFileSync('/etc/letsencrypt/live/youtubemyspotify.uk/cert.pem')
-}, httpsApp)
-.listen(443, function () {
-  console.log('Youtube My Spotify listening on 443!')
-})
+try{
+  https.createServer({
+    key: fs.readFileSync('/etc/letsencrypt/live/youtubemyspotify.uk/privkey.pem'),
+    cert: fs.readFileSync('/etc/letsencrypt/live/youtubemyspotify.uk/cert.pem')
+  }, httpsApp)
+  .listen(443, function () {
+    console.log('Youtube My Spotify listening on 443!')
+  })
+}
+catch{
+  console.log('no certs')
+}
 
 http.createServer(httpApp).listen(3000);
-console.log('...also listening on 3000 (y tho?)')
+console.log('listening on 3000')
 
 
 // openssl req -nodes -new -x509 -keyout server.key -out server.cert
