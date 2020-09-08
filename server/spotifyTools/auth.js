@@ -1,9 +1,24 @@
 var { Router } = require('express')
 var querystring = require('querystring');
 var request = require('request'); // "Request" library
+const winston = require('winston');
 
 const URI = 'https://youtubemyspotify.uk/';
 const CLIENT_URL = 'https://thewebby.github.io/YoutubeMySpotify/#/AccountManager/'
+
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.json(),
+  defaultMeta: { service: 'user-service' },
+  transports: [
+    //
+    // - Write all logs with level `error` and below to `error.log`
+    // - Write all logs with level `info` and below to `combined.log`
+    //
+    new winston.transports.File({ filename: 'error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'combined.log' }),
+  ],
+});
 
 var authRouter = Router()
 var Oauth = {
@@ -118,6 +133,12 @@ authRouter.get('/refresh_token', function (req, res) {
 authRouter.post('/getVideoId', function(req, res){    
   songName = req.body.songName;
   artistName = req.body.artistName;
+
+  logger.info('/getVideoId', {
+    time: Date.now(),
+    songName,
+    artistName
+  });
 
   res.header("Access-Control-Allow-Origin", "*");
   getVideoId(songName, artistName, (videoId) => {
