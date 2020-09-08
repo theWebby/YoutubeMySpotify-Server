@@ -156,4 +156,8 @@ function getTopResult(q, callback){
   );
 }
 
+authRouter.get('/_status', function(req, res) {
+  res.send('hello');
+});
+
 module.exports = { authRouter, Oauth };

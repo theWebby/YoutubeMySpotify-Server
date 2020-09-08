@@ -15,5 +15,8 @@ RUN npm install
 # Bundle app source
 COPY . .
 
-EXPOSE 3000
+ENV SPOTIFY_CID=    [SPOTIFY_CID]
+ENV SPOTIFY_SECRET= [SPOTIFY_SECRET]
+
+EXPOSE 3000, 443
 CMD [ "node", "app.js" ]

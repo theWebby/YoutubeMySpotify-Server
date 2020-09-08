@@ -25,11 +25,11 @@ https.createServer({
   cert: fs.readFileSync('/etc/letsencrypt/live/youtubemyspotify.uk/cert.pem')
 }, httpsApp)
 .listen(443, function () {
-  console.log('Example app listening on port 3000! Go to https://localhost:3000/')
+  console.log('Youtube My Spotify listening on 443!')
 })
 
 http.createServer(httpApp).listen(3000);
-console.log('Listening on 3000 and 443')
+console.log('...also listening on 3000 (y tho?)')
 
 
 // openssl req -nodes -new -x509 -keyout server.key -out server.cert
