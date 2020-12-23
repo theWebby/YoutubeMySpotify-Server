@@ -1,85 +1,162 @@
 "use strict";
-const querystring = require('querystring');
-const stateKey = 'spotify_auth_state';
+var request = require("request");
+const querystring = require("querystring");
+const { resolve } = require("path");
 
-function login(event){
-  let response
-  const URI = 'https://' + event.requestContext.domainName + '/';
+const stateKey = "spotify_auth_state";
+const SPOTIFY_CID = "7d6e6d5684a3404e834793cca7f8382d";
+const SPOTIFY_SECRET = "18cdd7e2215e40289d5475f71b53eb5e";
+
+const CLIENT_URL =
+  "https://thewebby.github.io/YoutubeMySpotify/#/AccountManager/";
+
+function login(event) {
+  let response;
+  const URI = "https://" + event.requestContext.domainName + "/";
   var Oauth = {
-    client_id: '7d6e6d5684a3404e834793cca7f8382d',
-    client_secret: '18cdd7e2215e40289d5475f71b53eb5e',
+    client_id: SPOTIFY_CID,
+    client_secret: SPOTIFY_SECRET,
     URI,
-    redirect_uri: URI + 'callback'
-  }
-  
-  
-  
-  try{
-    var clientUrl = 'https://thewebby.github.io/YoutubeMySpotify/';
+    redirect_uri: URI + "callback",
+  };
+
+  try {
     var state = generateRandomString(16);
-    var scope = 'user-read-private user-read-email user-read-currently-playing user-read-playback-state user-modify-playback-state user-top-read';
-    
-  
+    var scope =
+      "user-read-private user-read-email user-read-currently-playing user-read-playback-state user-modify-playback-state user-top-read";
+
     const spotifyAuthorizationParams = querystring.stringify({
-      response_type: 'code',
+      response_type: "code",
       client_id: Oauth.client_id,
       scope: scope,
-      redirect_uri: Oauth.redirect_uri + `?clientUrl=${clientUrl.replace('#', '%23')}`,
-      state: state
+      redirect_uri:
+        Oauth.redirect_uri + `?clientUrl=${CLIENT_URL.replace("#", "%23")}`,
+      state: state,
     });
-  
-    const redirectLocation = 'https://accounts.spotify.com/authorize?' + spotifyAuthorizationParams;
-  
+
+    const redirectLocation =
+      "https://accounts.spotify.com/authorize?" + spotifyAuthorizationParams;
+
     const spotifyAuthorizationHeaders = {
       "Access-Control-Allow-Origin": "*",
       "Cache-Control": "no-store",
-      "Cache-Control": "no-cache"
-    }
-  
+      "Cache-Control": "no-cache",
+    };
+
     response = {
       statusCode: 301,
       headers: {
         Location: redirectLocation,
-        ...spotifyAuthorizationHeaders
+        ...spotifyAuthorizationHeaders,
       },
-      multiValueHeaders : {"Set-Cookie": [`${stateKey}=${state}`]},
+      multiValueHeaders: { "Set-Cookie": [`${stateKey}=${state}`] },
     };
-  } catch (e){
+  } catch (e) {
     console.log(e);
     response = {
       statusCode: 420,
-      body: JSON.stringify(e)
-    }
+      body: JSON.stringify(e),
+    };
   }
 
-  return response;  
+  return response;
 }
 
-function callback(event){
-  return {
-    statusCode: 200,
-    body: JSON.stringify("Logged in")
+async function callback(event) {
+  console.log("here")
+  try {
+    const { queryStringParameters } = event;
+
+    const URI = "https://" + event.requestContext.domainName + "/";
+    let Oauth = {
+      client_id: SPOTIFY_CID,
+      client_secret: SPOTIFY_SECRET,
+      URI,
+      redirect_uri: URI + "callback",
+    };
+
+    var code = queryStringParameters.code || null;
+    var clientUrl = queryStringParameters.clientUrl || CLIENT_URL;
+    // var state = queryStringParameters.state || null;
+    // var storedState = req.cookies ? req.cookies[stateKey] : null;
+
+    //should probably do something with the state here
+
+    let authHeader = new Buffer.from(
+      SPOTIFY_CID + ":" + SPOTIFY_SECRET
+    ).toString("base64");
+
+    var authOptions = {
+      url: "https://accounts.spotify.com/api/token",
+      form: {
+        code: code,
+        redirect_uri:
+          Oauth.redirect_uri + `?clientUrl=${clientUrl.replace("#", "%23")}`,
+        grant_type: "authorization_code",
+      },
+      headers: { Authorization: "Basic " + authHeader },
+      json: true,
+    };
+
+    console.log("here 1", authOptions)
+    return new Promise((resolve, reject) => {
+      request.post(authOptions, function (error, response, body) {
+        console.log("here in request post")
+        if (!error && response.statusCode === 200) {
+          var access_token = body.access_token,
+            refresh_token = body.refresh_token;
+  
+          const queryString = querystring.stringify({
+            access_token: access_token,
+            refresh_token: refresh_token,
+          });
+          const redirectLocation = `${clientUrl}?&${queryString}`;
+          console.log("here 2", access_token, refresh_token, redirectLocation)
+          resolve({
+            statusCode: 301,
+            headers: {
+              YOLO: "YOLO",
+              Location: redirectLocation,
+            },
+          });
+        } else {
+          console.log("here 3")
+          resolve({
+            statusCode: 500,
+            body: JSON.stringify("Uh oh"),
+          });
+        }
+      });
+    }) 
+
+    console.log("no not here pls")
+  } catch (e) {
+    console.log(e);
+    return {
+      statusCode: 420,
+      body: JSON.stringify(e),
+    };
   }
 }
 
 module.exports.login = async (event) => {
-  console.log("yo yo event", event)
-  switch(event.path){
-    case '/login':
+  console.log("yo yo event", event);
+  switch (event.path) {
+    case "/login":
       return login(event);
-    case '/callback':
-      return callback(event);
+    case "/callback":
+      return await callback(event);
     default:
       return {
-        statusCode: 404 
-      }
+        statusCode: 404,
+      };
   }
 };
 
-
 var generateRandomString = function (length) {
-  var text = '';
-  var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var text = "";
+  var possible =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
   for (var i = 0; i < length; i++) {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
