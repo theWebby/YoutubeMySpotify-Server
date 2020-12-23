@@ -8,15 +8,14 @@
     "serverless-dotenv-plugin": "^3.1.0"
   },
   "devDependencies": {
-    "cross-env": "^7.0.3",
     "serverless": "^2.16.1",
     "serverless-domain-manager": "^5.1.0"
   },
   "scripts": {
-    "remove-dev": "cross-env NODE_ENV=dev&& sls remove",
-    "remove-prod": "cross-env NODE_ENV=prod&& sls remove",
-    "deploy-dev": "cross-env NODE_ENV=dev&& sls deploy",
-    "deploy-prod": "cross-env NODE_ENV=prod&& sls deploy",
+    "remove-dev": "export NODE_ENV=dev&& sls remove",
+    "remove-prod": "export NODE_ENV=prod&& sls remove",
+    "deploy-dev": "export NODE_ENV=dev&& sls deploy",
+    "deploy-prod": "export NODE_ENV=prod&& sls deploy",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
