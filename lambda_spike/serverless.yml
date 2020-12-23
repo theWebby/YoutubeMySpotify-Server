@@ -2,15 +2,14 @@ plugins:
   - serverless-domain-manager
 
 custom:
-  stage: ${env:NODE_ENV}
-  dev:
+  development:
     domainName: dev.youtubemyspotify.co.uk
-  prod:
+  production:
     domainName: youtubemyspotify.co.uk
   customDomain:
     basePath: ""
-    domainName: ${self:custom.${self:custom.stage}.domainName}
-    stage: ${self:custom.stage}
+    domainName: ${self:custom.${self:provider.stage}.domainName}
+    stage: ${self:provider.stage}
     createRoute53Record: true
 
 service: youtube-my-spotify
@@ -20,7 +19,7 @@ provider:
   name: aws
   region: eu-west-2
   runtime: nodejs12.x
-  stage: ${self:custom.stage}
+  stage: ${opt:stage, 'development'}
   memorySize: 128
 
 functions:
