@@ -115,7 +115,7 @@ async function callback(event) {
           resolve({
             statusCode: 301,
             headers: {
-              YOLO: "YOLO",
+              YOLO: "YOLO 123",
               Location: redirectLocation,
             },
           });

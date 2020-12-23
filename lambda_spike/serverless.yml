@@ -1,6 +1,5 @@
 plugins:
   - serverless-domain-manager
-  - serverless-dotenv-plugin
 
 custom:
   stage: ${env:NODE_ENV}
