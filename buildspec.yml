@@ -1,10 +1,18 @@
 version: 0.2
 
+
 phases:
   pre_build:
     commands:
-       - echo test123
+       - echo $(git describe --tags --abbrev=0)
+       - export TAG=$(git describe --tags --abbrev=0)
        - env
+       - |
+         if grep -q release <<< $TAG; then
+            echo found
+          else
+              echo not found
+          fi
        - cd lambda_spike
        - npm i --production=false
   build:
