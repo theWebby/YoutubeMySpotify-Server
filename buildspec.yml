@@ -1,19 +1,15 @@
 version: 0.2
 
-
 phases:
-  pre_build:
-    commands:
-       - cd lambda_spike
-       - echo $(git tag --points-at HEAD)
-       - export TAG=$(git tag --points-at HEAD)
-       - env
-       - |
-         if grep -q release <<< $TAG; then
-            npm i --production=true  
-         else
-            npm i --production=false  
-         fi
   build:
     commands:
-       - npm run deploy-dev
+       - cd lambda_spike
+       - npm i
+       - echo $(git tag --points-at HEAD)
+       - export TAG=$(git tag --points-at HEAD)
+       - |
+         if grep -q release <<< $TAG; then
+            npm run deploy-prod
+         else
+            npm run deploy-dev
+         fi
