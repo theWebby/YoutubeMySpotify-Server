@@ -12,6 +12,8 @@ custom:
     stage: ${self:provider.stage}
     createRoute53Record: true
 
+useDotenv: true
+
 service: youtube-my-spotify
 frameworkVersion: "2"
 
