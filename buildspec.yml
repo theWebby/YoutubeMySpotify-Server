@@ -1,0 +1,12 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+       - echo test123
+       - env
+       - cd lambda_spike
+       - npm i --production=false
+  build:
+    commands:
+       - npm run deploy-dev
