@@ -35,6 +35,13 @@ functions:
           path: login
           method: get
           cors: true
+  hello:
+    handler: handler.helloWorld
+    events:
+      - http:
+          path: hello
+          method: get
+          cors: true
 
 
 # you can add statements to the Lambda function's IAM Role here
