@@ -13,7 +13,7 @@ const CLIENT_URL =
 module.exports.helloWorld = async (event) => {
   return {
     statusCode: 200,
-    body: JSON.stringify("Hello Worldssss")
+    body: JSON.stringify("THIS IS PROD")
   }
 }
 
