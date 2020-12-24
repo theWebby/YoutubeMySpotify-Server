@@ -11,10 +11,10 @@
     "serverless-domain-manager": "^5.1.0"
   },
   "scripts": {
-    "remove-dev": "export NODE_ENV=dev&& sls remove",
-    "remove-prod": "export NODE_ENV=prod&& sls remove",
-    "deploy-dev": "export NODE_ENV=dev&& sls deploy",
-    "deploy-prod": "export NODE_ENV=prod&& sls deploy",
+    "remove-dev": "sls remove --stage development",
+    "remove-prod": "sls remove --stage production",
+    "deploy-dev": "sls deploy --stage development",
+    "deploy-prod": "sls deploy --stage production",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
