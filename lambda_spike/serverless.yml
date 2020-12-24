@@ -39,7 +39,7 @@ functions:
     handler: handler.helloWorld
     events:
       - http:
-          path: hello
+          path: /
           method: get
           cors: true
 

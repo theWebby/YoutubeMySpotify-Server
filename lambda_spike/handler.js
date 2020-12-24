@@ -10,10 +10,10 @@ const SPOTIFY_SECRET = "18cdd7e2215e40289d5475f71b53eb5e";
 const CLIENT_URL =
   "https://thewebby.github.io/YoutubeMySpotify/#/AccountManager/";
 
-function helloWorld(event){
+module.exports.helloWorld = async (event) => {
   return {
     statusCode: 200,
-    body: JSON.stringify("Hello World")
+    body: JSON.stringify("Hello Worldssss")
   }
 }
 
