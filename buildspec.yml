@@ -6,7 +6,7 @@ phases:
        - echo $(git tag --points-at HEAD)
        - export TAG=$(git tag --points-at HEAD)
        - cd lambda_spike
-       - npm i
+       - npm install --quiet
        - |
          if grep -q release <<< $TAG; then
             npm run deploy-prod
