@@ -6,16 +6,62 @@ const { resolve } = require("path");
 const stateKey = "spotify_auth_state";
 const SPOTIFY_CID = "7d6e6d5684a3404e834793cca7f8382d";
 const SPOTIFY_SECRET = "18cdd7e2215e40289d5475f71b53eb5e";
+var http = require("https");
 
 const CLIENT_URL =
   "https://thewebby.github.io/YoutubeMySpotify/#/AccountManager/";
 
-module.exports.helloWorld = async (event) => {
+function getVideoId(songName, artistName) {
+  return new Promise((resolve, reject) => {
+    var q = songName + " " + artistName + " music video";
+    q = q.replace(/[^a-zA-Z1-9 ]+/g, "");
+    q = q.replace(/[ ]+/g, "+");
+
+    var options = {
+      host: "www.youtube.com",
+      port: 443,
+      path: `/results?search_query=${q}`,
+    };
+
+    http
+      .get(options, function (res) {
+        var body = "";
+
+        res.on("data", function (chunk) {
+          body += chunk;
+        });
+        res.on("end", function () {
+          var txt = body;
+
+          var re1 = ".*"; // Non-greedy match on filler
+          var re2 = "((https://i.ytimg.com/vi/)[a-zA-Z0-9-_]+)"; // Alphanum 1
+
+          var p = new RegExp(re2, ["i"]);
+          var m = p.exec(txt);
+          if (m != null) {
+            var alphanum1 = m[1].replace(m[2], "");
+            var result = alphanum1;
+
+            resolve(result);
+          }
+        });
+      })
+      .on("error", function (e) {
+        console.log("Got error: " + e.message);
+      });
+  });
+}
+
+module.exports.getVideoId = async (event) => {
+  console.log(event);
+
   return {
     statusCode: 200,
-    body: JSON.stringify("THIS IS DEV")
-  }
-}
+    body: JSON.stringify({
+      videoId: getVideoId("lose yourself", "eminem"),
+    }),
+  };
+};
 
 function login(event) {
   let response;
@@ -70,7 +116,7 @@ function login(event) {
 }
 
 async function callback(event) {
-  console.log("here")
+  console.log("here");
   try {
     const { queryStringParameters } = event;
 
@@ -105,20 +151,20 @@ async function callback(event) {
       json: true,
     };
 
-    console.log("here 1", authOptions)
+    console.log("here 1", authOptions);
     return new Promise((resolve, reject) => {
       request.post(authOptions, function (error, response, body) {
-        console.log("here in request post")
+        console.log("here in request post");
         if (!error && response.statusCode === 200) {
           var access_token = body.access_token,
             refresh_token = body.refresh_token;
-  
+
           const queryString = querystring.stringify({
             access_token: access_token,
             refresh_token: refresh_token,
           });
           const redirectLocation = `${clientUrl}?&${queryString}`;
-          console.log("here 2", access_token, refresh_token, redirectLocation)
+          console.log("here 2", access_token, refresh_token, redirectLocation);
           resolve({
             statusCode: 301,
             headers: {
@@ -127,16 +173,16 @@ async function callback(event) {
             },
           });
         } else {
-          console.log("here 3")
+          console.log("here 3");
           resolve({
             statusCode: 500,
             body: JSON.stringify("Uh oh"),
           });
         }
       });
-    }) 
+    });
 
-    console.log("no not here pls")
+    console.log("no not here pls");
   } catch (e) {
     console.log(e);
     return {

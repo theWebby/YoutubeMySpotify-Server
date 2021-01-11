@@ -37,11 +37,11 @@ functions:
           method: get
           cors: true
   hello:
-    handler: handler.helloWorld
+    handler: handler.getVideoId
     events:
       - http:
-          path: /
-          method: get
+          path: getVideoId
+          method: post
           cors: true
 
 
