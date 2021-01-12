@@ -36,7 +36,11 @@ functions:
           path: login
           method: get
           cors: true
-  hello:
+      - http:
+          path: refresh_token
+          method: get
+          cors: true
+  getVideoId:
     handler: handler.getVideoId
     events:
       - http:

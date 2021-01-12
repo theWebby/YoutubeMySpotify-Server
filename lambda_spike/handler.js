@@ -1,15 +1,43 @@
 "use strict";
-var request = require("request");
+const request = require("request");
 const querystring = require("querystring");
-const { resolve } = require("path");
+const http = require("https");
 
 const stateKey = "spotify_auth_state";
 const SPOTIFY_CID = "7d6e6d5684a3404e834793cca7f8382d";
 const SPOTIFY_SECRET = "18cdd7e2215e40289d5475f71b53eb5e";
-var http = require("https");
-
 const CLIENT_URL =
   "https://thewebby.github.io/YoutubeMySpotify/#/AccountManager/";
+
+module.exports.getVideoId = async (event) => {
+  const { songName, artistName } = JSON.parse(event.body);
+
+  return {
+    statusCode: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+    },
+    body: JSON.stringify({
+      videoId: await getVideoId(songName, artistName),
+    }),
+  };
+};
+
+module.exports.login = async (event) => {
+  console.log("yo yo event", event);
+  switch (event.path) {
+    case "/login":
+      return login(event);
+    case "/callback":
+      return await callback(event);
+    case "/refresh_token":
+      return await refreshToken(event);
+    default:
+      return {
+        statusCode: 404,
+      };
+  }
+};
 
 function getVideoId(songName, artistName) {
   return new Promise((resolve, reject) => {
@@ -51,17 +79,6 @@ function getVideoId(songName, artistName) {
       });
   });
 }
-
-module.exports.getVideoId = async (event) => {
-  console.log(event);
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      videoId: getVideoId("lose yourself", "eminem"),
-    }),
-  };
-};
 
 function login(event) {
   let response;
@@ -113,6 +130,43 @@ function login(event) {
   }
 
   return response;
+}
+
+async function refreshToken(event) {
+  var refresh_token = event.queryStringParameters.refresh_token;
+
+  return {
+    statusCode: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+    },
+    body: JSON.stringify({
+      access_token: await getNewAccessToken(refresh_token),
+    }),
+  };
+}
+
+async function getNewAccessToken(refreshToken) {
+  return new Promise((resolve, reject) => {
+    var authOptions = {
+      url: "https://accounts.spotify.com/api/token",
+      headers: {
+        Authorization:
+          "Basic " +
+          new Buffer(SPOTIFY_CID + ":" + SPOTIFY_SECRET).toString("base64"),
+      },
+      form: {
+        grant_type: "refresh_token",
+        refresh_token: refreshToken,
+      },
+      json: true,
+    };
+
+    request.post(authOptions, function (error, response, body) {
+      var access_token = body.access_token;
+      resolve(access_token);
+    });
+  });
 }
 
 async function callback(event) {
@@ -191,20 +245,6 @@ async function callback(event) {
     };
   }
 }
-
-module.exports.login = async (event) => {
-  console.log("yo yo event", event);
-  switch (event.path) {
-    case "/login":
-      return login(event);
-    case "/callback":
-      return await callback(event);
-    default:
-      return {
-        statusCode: 404,
-      };
-  }
-};
 
 var generateRandomString = function (length) {
   var text = "";
